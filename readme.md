@@ -23,7 +23,7 @@ This project aims to uncover brand-wise, feature-wise, and model-wise insights t
 
 ## 📁 Dataset
 
-- Source: Flipkart (Kaggle Dataset)
+- Source: [Flipkart (Kaggle Dataset)](https://www.kaggle.com/datasets/mrmars1010/filpkart-mobiles)
 - Focus: Indian smartphone market
 - Format: CSV
 - Columns include:
@@ -79,9 +79,11 @@ This project aims to uncover brand-wise, feature-wise, and model-wise insights t
 
 1. Clone the repository  
 2. Install dependencies:
+
     pip install -r requirements.txt
 3.  Launch the Streamlit app:
-    streamlit run app.py
+
+    streamlit run home.py
 
 ---
 ## 📌 Future Enhancements

@@ -116,10 +116,20 @@ elif menu == "Brand Explorer":
     
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
-        all_brands = sorted(df['Brand'].unique())
-        selected_brand = st.selectbox("📍 Select a Brand:", all_brands)
+        # Mapping of original brand names to title case
+        brand_map = {brand: brand.title() for brand in df['Brand'].unique()}
+        inv_brand_map = {v: k for k, v in brand_map.items()}
 
+        # Dropdown options in title case
+        display_brands = sorted(brand_map.values())
+        selected_display_brand = st.selectbox("Select a brand to explore:", display_brands)
+
+        # Convert back to original for filtering
+        selected_brand = inv_brand_map[selected_display_brand]
+
+        # Filter the DataFrame using original brand value
         brand_df = df[df['Brand'] == selected_brand]
+
 
         # Basic Info Metrics
         st.markdown("### 📊 Brand Summary")
@@ -211,7 +221,11 @@ elif menu == "Brand Explorer":
                 yaxis_title="Max RAM (GB)",
                 title_x=0.3,
                 font=dict(size=13),
-                margin=dict(l=40, r=40, t=60, b=40)
+                margin=dict(l=40, r=40, t=60, b=40),
+                title = dict(
+                    x=0.0,
+                    xanchor="left",
+                )
             )
 
             st.plotly_chart(fig_ram, use_container_width=True)
@@ -256,7 +270,11 @@ elif menu == "Brand Explorer":
                 yaxis_title="Max Storage (GB)",
                 title_x=0.3,
                 font=dict(size=13),
-                margin=dict(l=40, r=40, t=60, b=40)
+                margin=dict(l=40, r=40, t=60, b=40),
+                title = dict(
+                    x=0.0,
+                    xanchor="left",
+                )
             )
 
             st.plotly_chart(fig_storage, use_container_width=True)
@@ -302,7 +320,11 @@ elif menu == "Brand Explorer":
                 yaxis_title="Max Camera (MP)",
                 title_x=0.3,
                 font=dict(size=13),
-                margin=dict(l=40, r=40, t=60, b=40)
+                margin=dict(l=40, r=40, t=60, b=40),
+                title = dict(
+                    x=0.0,
+                    xanchor="left",
+                )
             )
 
             st.plotly_chart(fig_camera, use_container_width=True)
@@ -338,7 +360,7 @@ elif menu == "Brand Explorer":
             )
 
             fig_pie.update_layout(
-                title_font=dict(size=20, family="Arial", color="#EDE5E5"),
+                title_font=dict(size=20, family="Arial", color="#4C4848"),
                 font=dict(size=13, family="Arial", color="#333"),
                 showlegend=True,
                 legend_title_text="<b>Segment</b>",
@@ -358,26 +380,61 @@ elif menu == "Model Explorer":
     st.title("🔍 Model Explorer")
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
-        min_price = int(df['Actual price'].min())
-        max_price = int(df['Actual price'].max())
+        # 1. Get global price range
+        global_min_price = int(df['Actual price'].min())
+        global_max_price = int(df['Actual price'].max())
 
-        price_range = st.slider(
-            "Select Price Range (₹)",
-            min_value=min_price,
-            max_value=max_price,
-            value=(min_price, max_price),
-            step=500
-        )
+        # 2. Price range input FIRST (with default full range)
+        col1, col2 = st.columns(2)
+        with col1:
+            user_min_price = st.number_input(
+                "Minimum Price (₹)",
+                min_value=0,
+                max_value=global_max_price,
+                value=global_min_price,
+                step=500
+            )
+        with col2:
+            user_max_price = st.number_input(
+                "Maximum Price (₹)",
+                min_value=user_min_price,
+                max_value=global_max_price,
+                value=global_max_price,
+                step=500
+            )
 
-        # Filter dataframe based on price
-        df = df[(df['Actual price'] >= price_range[0]) & (df['Actual price'] <= price_range[1])]
+        # 3. Filter DataFrame based on selected price range
+        price_filtered_df = df[
+            (df['Actual price'] >= user_min_price) &
+            (df['Actual price'] <= user_max_price)
+        ]
 
-        st.subheader("Select Brands and Models")
-        brands = sorted(df['Brand'].unique())
-        selected_brands = st.multiselect("Select brand(s):", brands)
+        # 4. Now get brands that exist within selected price range
+        # Create mapping: lowercase → Title Case
+        brand_map = {brand: brand.title() for brand in price_filtered_df['Brand'].unique()}
+        # Inverse map for lookup
+        inv_brand_map = {v: k for k, v in brand_map.items()}
 
-        model_options = sorted(df[df['Brand'].isin(selected_brands)]['Product Name'].unique())
+        # Show dropdown with title case labels
+        display_brands = sorted(brand_map.values())
+        selected_display_brands = st.multiselect("Select brand(s):", display_brands)
+
+        # Internally map selected back to actual brand names
+        selected_brands = [inv_brand_map[b] for b in selected_display_brands]
+
+
+        # 5. Filter again based on selected brands
+        if selected_brands:
+            filtered_df = price_filtered_df[price_filtered_df['Brand'].isin(selected_brands)]
+        else:
+            filtered_df = price_filtered_df.copy()
+
+        # 6. Show available models for this final filtered set
+        model_options = sorted(filtered_df['Product Name'].unique())
         selected_models = st.multiselect("Select model(s):", model_options)
+
+        st.markdown(f"📱 **{len(model_options)} models** available for selection.")
+
 
         compare_df = df[df['Product Name'].isin(selected_models)]
         # Drop duplicate models by keeping highest rated one (or use some other logic)
@@ -476,11 +533,9 @@ elif menu == "Model Explorer":
                 font=dict(size=12),
             )
         )
-
             st.plotly_chart(fig_rating_pie, use_container_width=True)
-
-
             
+                        
             st.subheader("🗣️ Reviews Distribution of Selected Models")
             fig_reviews_pie = px.pie(
                 compare_df,
@@ -577,6 +632,7 @@ elif menu == "Model Explorer":
                     "Count: %{value} (%{percent})<extra></extra>"
                 ),
                 marker=dict(line=dict(color="white", width=2)),  # Gap between slices
+                textfont=dict(color='white')
             )
 
             # Layout beautification

@@ -77,8 +77,8 @@ st.set_page_config(page_title="Mobile Market Analysis", layout="wide")
 menu = st.sidebar.selectbox("📁 Menu", (
     "Overview", 
     "Preprocessing", 
-    "Brand Explorer", 
-    "Model Explorer", 
+    "Brand Insights", 
+    "Compare Models", 
     "Feature Insight"
 ))
 
@@ -111,8 +111,8 @@ elif menu == "Preprocessing":
     else:
         st.warning("Please upload raw data or run preprocessing first.")
 
-elif menu == "Brand Explorer":
-    st.title("🏷️ Brand Explorer")
+elif menu == "Brand Insights":
+    st.title("🏷️ Brand Insights")
     
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
@@ -373,11 +373,11 @@ elif menu == "Brand Explorer":
 
 
     else:
-        st.warning("Please preprocess the data first to access Brand Explorer.")
+        st.warning("Please preprocess the data first to access Brand Insights.")
 
 
-elif menu == "Model Explorer":
-    st.title("🔍 Model Explorer")
+elif menu == "Compare Models":
+    st.title("🔍 Models Comparison")
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
         # 1. Get global price range

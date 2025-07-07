@@ -16,7 +16,7 @@ This project aims to uncover brand-wise, feature-wise, and model-wise insights t
 - Build an interactive and user-friendly **Streamlit** dashboard with:
   - Data preprocessing pipeline
   - EDA visualizations
-  - Brand explorer
+  - Brand Insights
   - Model comparison interface
 
 ---
@@ -53,25 +53,21 @@ This project aims to uncover brand-wise, feature-wise, and model-wise insights t
 - Run preprocessing on raw data  
 - View cleaned and transformed dataset  
 
-### 3. **EDA Tab**
-- Choose analysis type:
-  - Brand-wise
-  - Feature-wise
-  - Distribution and Correlation
-- Dynamic interactive plots using Plotly
-
-### 4. **Brand Explorer Tab**
+### 4. **Brand Insights Tab**
 - Select a brand to explore:
   - Segment distribution
-  - Feature vs Price trends (RAM, Storage, Camera)
+  - Feature vs Price (RAM, Storage, Camera)
   - Brand-specific statistics
 
-### 5. **Model Explorer Tab**
+### 5. **Compare Models**
 - Select multiple models (even across brands)  
 - Compare features like:
   - Price, RAM, Storage
   - Ratings & Reviews (Bubble Chart)
 - Add/Remove selections interactively
+
+### 6. **Feature Insight**
+- Analyse what dependency the whole dataset shows between different attributes
 
 ---
 
@@ -83,7 +79,7 @@ This project aims to uncover brand-wise, feature-wise, and model-wise insights t
     pip install -r requirements.txt
 3.  Launch the Streamlit app:
 
-    streamlit run home.py
+    streamlit run app.py
 
 ---
 ## 📌 Future Enhancements

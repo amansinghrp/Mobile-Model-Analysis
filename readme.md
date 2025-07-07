@@ -3,7 +3,7 @@ A Data Science Project analyzing smartphone models from Flipkart’s Indian mark
 
 This project aims to uncover brand-wise, feature-wise, and model-wise insights through comprehensive preprocessing, EDA, and visualizations.
 
-The app is live at: [Open App] (https://mobile-model-analysis.streamlit.app/)
+The app is live at: (https://mobile-model-analysis.streamlit.app/)
 
 ---
 

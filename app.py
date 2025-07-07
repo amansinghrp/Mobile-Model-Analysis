@@ -140,18 +140,50 @@ elif menu == "Brand Insights":
 
         # Data table
         with st.expander("🗃️ View All Models from this Brand"):
-            st.dataframe(brand_df, height=400, use_container_width=True)
+            st.dataframe(brand_df.reset_index(drop=True), height=400, use_container_width=True)
 
         # Segment Distribution
-        with st.expander("📦 Segment Distribution"):
-            seg_count = brand_df['Segment'].value_counts().reset_index()
-            seg_count.columns = ['Segment', 'Count']
-            segment_order = ['Budget', 'Mid-Range', 'Flagship']
-            fig1 = px.bar(seg_count, x='Segment', y='Count', category_orders={'Segment': segment_order},
-                          title=f"Segment Distribution - {selected_brand}",
-                          color='Segment', color_discrete_map={"Budget": "green", "Mid-Range": "orange", "Flagship": "red"})
-           
-            st.plotly_chart(fig1, use_container_width=True)
+        with st.expander("💡 Segment-wise Distribution for Selected Brand"):
+            # Compute segment distribution for selected brand
+            segment_dist = brand_df['Segment'].value_counts().reindex(['Budget', 'Mid-Range', 'Flagship'], fill_value=0).reset_index()
+            segment_dist.columns = ['Segment', 'Count']
+
+            # Define a professional color scheme
+            segment_colors = {
+                "Flagship": "#4E79A7",     # Deep blue
+                "Mid-Range": "#59A14F",    # Green
+                "Budget": "#F28E2B",       # Orange
+            }
+
+            fig_pie = px.pie(
+                segment_dist,
+                names='Segment',
+                values='Count',
+                title=f"<b>Segment Distribution for {selected_brand.capitalize()}</b>",
+                color='Segment',
+                color_discrete_map=segment_colors,
+                hole=0.4  # donut-style
+            )
+
+            fig_pie.update_traces(
+                textinfo='label+percent',
+                textfont=dict(size=14, family='Arial', color='white'),
+                pull=[0.05, 0.02, 0.05],  # slight "pop-out" effect
+                marker=dict(line=dict(color='white', width=2)),  # border styling
+                hovertemplate="<b>%{label}</b><br>Models: %{value}<br>Share: %{percent}<extra></extra>",
+            )
+
+            fig_pie.update_layout(
+                title_font=dict(size=20, family="Arial", color="#4C4848"),
+                font=dict(size=13, family="Arial", color="#333"),
+                showlegend=True,
+                legend_title_text="<b>Segment</b>",
+                legend=dict(orientation='h', yanchor='bottom', y=-0.2, xanchor='center', x=0.5),
+                margin=dict(l=50, r=50, t=80, b=100),
+                template="plotly_white"
+            )
+
+            st.plotly_chart(fig_pie, use_container_width=True)
 
         # Price Distribution
         with st.expander("💰 Price Distribution"):
@@ -208,7 +240,7 @@ elif menu == "Brand Insights":
                 hover_data={"All Top Models": True},
                 title="💾 Best RAM Configuration by Price Bin",
                 color="RAM (GB)",
-                color_continuous_scale="Blues"
+                color_continuous_scale=px.colors.sequential.Blues[2:]
             )
 
             fig_ram.update_traces(
@@ -257,7 +289,7 @@ elif menu == "Brand Insights":
                 hover_data={"All Top Models": True},
                 title="💽 Best Storage Configuration by Price Bin",
                 color="Storage (GB)",
-                color_continuous_scale="Purples"
+                color_continuous_scale=px.colors.sequential.Purples[2:]
             )
 
             fig_storage.update_traces(
@@ -307,7 +339,7 @@ elif menu == "Brand Insights":
                 hover_data={"All Top Models": True},
                 title="📸 Best Primary Camera by Price Bin",
                 color="Primary Camera (MP)",
-                color_continuous_scale="Reds"
+                color_continuous_scale=px.colors.sequential.Reds[2:]
             )
 
             fig_camera.update_traces(
@@ -328,49 +360,6 @@ elif menu == "Brand Insights":
             )
 
             st.plotly_chart(fig_camera, use_container_width=True)
-
-        with st.expander("💡 Segment-wise Distribution for Selected Brand"):
-            # Compute segment distribution for selected brand
-            segment_dist = brand_df['Segment'].value_counts().reindex(['Budget', 'Mid-Range', 'Flagship'], fill_value=0).reset_index()
-            segment_dist.columns = ['Segment', 'Count']
-
-            # Define a professional color scheme
-            segment_colors = {
-                "Flagship": "#4E79A7",     # Deep blue
-                "Mid-Range": "#59A14F",    # Green
-                "Budget": "#F28E2B",       # Orange
-            }
-
-            fig_pie = px.pie(
-                segment_dist,
-                names='Segment',
-                values='Count',
-                title=f"<b>Segment Distribution for {selected_brand.capitalize()}</b>",
-                color='Segment',
-                color_discrete_map=segment_colors,
-                hole=0.4  # donut-style
-            )
-
-            fig_pie.update_traces(
-                textinfo='label+percent',
-                textfont=dict(size=14, family='Arial', color='white'),
-                pull=[0.05, 0.02, 0.05],  # slight "pop-out" effect
-                marker=dict(line=dict(color='white', width=2)),  # border styling
-                hovertemplate="<b>%{label}</b><br>Models: %{value}<br>Share: %{percent}<extra></extra>",
-            )
-
-            fig_pie.update_layout(
-                title_font=dict(size=20, family="Arial", color="#4C4848"),
-                font=dict(size=13, family="Arial", color="#333"),
-                showlegend=True,
-                legend_title_text="<b>Segment</b>",
-                legend=dict(orientation='h', yanchor='bottom', y=-0.2, xanchor='center', x=0.5),
-                margin=dict(l=50, r=50, t=80, b=100),
-                template="plotly_white"
-            )
-
-            st.plotly_chart(fig_pie, use_container_width=True)
-
 
     else:
         st.warning("Please preprocess the data first to access Brand Insights.")
@@ -441,7 +430,7 @@ elif menu == "Compare Models":
         compare_df = compare_df.sort_values('Rating', ascending=False).drop_duplicates(subset='Product Name')
         if not compare_df.empty:
             st.subheader("📋 Model Details")
-            st.dataframe(compare_df[['Product Name', 'Brand', 'Actual price', 'RAM (GB)', 'Storage (GB)', 'Primary Camera (MP)', 'Rating', 'Reviews']], use_container_width=True)
+            st.dataframe(compare_df.reset_index(drop=True), use_container_width=True)
             st.subheader("📊 Model Comparison - Price")
             fig_price = px.bar(compare_df, x='Product Name', y='Actual price', color='Brand', title="Price Comparison")
             fig_price.update_layout(
@@ -466,14 +455,14 @@ elif menu == "Compare Models":
             fig_price.add_trace(go.Bar(
                 x=compare_df['Product Name'],
                 y=compare_df['Discount price'],
-                name='Discount Price',
+                name='Discounted Price',
                 marker_color='lightcoral',
                 width=[bar_width] * len(compare_df)
             ))
 
             # Layout
             fig_price.update_layout(
-                title='Comparison of Actual and Discount Prices',
+                title='Comparison of Actual and Discounted Prices',
                 xaxis_title='Model',
                 yaxis_title='Price (₹)',
                 barmode='group',

@@ -74,21 +74,70 @@ def preprocess_data():
 # Streamlit App Setup
 st.set_page_config(page_title="Mobile Market Analysis", layout="wide")
 
-menu = st.sidebar.selectbox("📁 Menu", (
-    "Overview", 
-    "Preprocessing", 
-    "Brand Insights", 
-    "Compare Models", 
-    "Feature Insight"
-))
+# Custom CSS styling
+st.markdown("""
+    <style>
+    .sidebar-title {
+        font-size: 25px !important;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    div.stButton > button {
+        background-color: transparent;
+        border: none;
+        font-size: 18px;
+        text-align: left;
+        padding: 0.5rem 0;
+    }
+    div.stButton > button:hover {
+        color: #3571cd;
+        background-color: rgba(53, 113, 205, 0.1);
+    }
+    div.stButton > button:focus {
+        color: #3571cd;
+        font-weight: bold;
+    }
+    </style>
+""", unsafe_allow_html=True)
 
+# Sidebar menu
+menu_options = ["🏠 Overview", "🧹 Preprocessing", "🏷️ Brand Insights", "📱 Compare Models", "📊 Feature Insight"]
 
-if menu == "Overview":
-    st.title("📊 Mobile Market Analysis (India - Flipkart)")
+if "current_page" not in st.session_state:
+    st.session_state.current_page = menu_options[0]
+
+with st.sidebar:
+    st.markdown('<div class="sidebar-title">Menu</div>', unsafe_allow_html=True)
+    for option in menu_options:
+        if st.button(option):
+            st.session_state.current_page = option
+
+# Use the selected page
+menu = st.session_state.current_page
+
+if menu == "🏠 Overview":
+    st.markdown(
+        "<h1 style='text-align: center;'>📊 Mobile Market Analysis Dashboard</h1>", 
+        unsafe_allow_html=True
+    )
+
+    # Banner Image (adjust path or use an online link)
+    st.image("assets/img1.jpeg")
+
     st.markdown("""
-    This Streamlit app performs an exploratory data analysis on a dataset of mobile phones sold in India, scraped from Flipkart. 
-    It includes data preprocessing, price and feature analysis, and brand-specific insights.
-    """)
+    Welcome to the **Mobile Model Analysis App** – your one-stop dashboard for exploring and comparing mobile phones.
+
+
+    ### 🔍 What This App Offers:
+    - **Cleaned & Preprocessed Data** scraped from Flipkart
+    - **Brand-Level Insights**: segment distributions, price trends, and more
+    - **Model Comparisons** across multiple features (RAM, Price, Ratings, Reviews, etc.)
+    - **Feature Trends**: Discover the best camera, RAM, or storage in various price ranges
+    - **Elegant Visualizations** powered by Plotly
+
+    Explore the sidebar to get started!
+    """, unsafe_allow_html=True)
+
     if os.path.exists(RAW_DATA_PATH):
         raw_df = pd.read_csv(RAW_DATA_PATH)
         st.subheader("Raw Dataset Sample")
@@ -96,7 +145,7 @@ if menu == "Overview":
     else:
         st.warning("Raw dataset not found.")
 
-elif menu == "Preprocessing":
+elif menu == "🧹 Preprocessing":
     st.title("🧹 Data Preprocessing")
     st.write("This section applies the original preprocessing pipeline from your notebook.")
 
@@ -111,7 +160,7 @@ elif menu == "Preprocessing":
     else:
         st.warning("Please upload raw data or run preprocessing first.")
 
-elif menu == "Brand Insights":
+elif menu == "🏷️ Brand Insights":
     st.title("🏷️ Brand Insights")
     
     if os.path.exists(CLEANED_DATA_PATH):
@@ -174,7 +223,7 @@ elif menu == "Brand Insights":
             )
 
             fig_pie.update_layout(
-                title_font=dict(size=20, family="Arial", color="#4C4848"),
+                title_font=dict(size=20, family="Arial"),
                 font=dict(size=13, family="Arial", color="#333"),
                 showlegend=True,
                 legend_title_text="<b>Segment</b>",
@@ -365,8 +414,8 @@ elif menu == "Brand Insights":
         st.warning("Please preprocess the data first to access Brand Insights.")
 
 
-elif menu == "Compare Models":
-    st.title("🔍 Models Comparison")
+elif menu == "📱 Compare Models":
+    st.title("📱 Compare Models")
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
         # 1. Get global price range
@@ -645,8 +694,8 @@ elif menu == "Compare Models":
     else:
         st.warning("Please preprocess the data first.")
 
-elif menu == "Feature Insight":
-    st.title("📐 Feature Insights")
+elif menu == "📊 Feature Insight":
+    st.title("📊 Feature Insight")
     if os.path.exists(CLEANED_DATA_PATH):
         df = pd.read_csv(CLEANED_DATA_PATH)
 
@@ -671,7 +720,7 @@ elif menu == "Feature Insight":
                 text='<b>Correlation Heatmap of Numeric Features</b>',
                 x=0.5,
                 xanchor='center',
-                font=dict(size=20, color='#333')
+                font=dict(size=20)
             ),
             xaxis_title='Features',
             yaxis_title='Features',

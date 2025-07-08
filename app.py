@@ -147,8 +147,6 @@ if menu == "🏠 Overview":
 
 elif menu == "🧹 Preprocessing":
     st.title("🧹 Data Preprocessing")
-    st.write("This section applies the original preprocessing pipeline from your notebook.")
-
     if st.button("Run Preprocessing"):
         cleaned_df = preprocess_data()
         st.success("Preprocessing complete. Cleaned data saved.")
